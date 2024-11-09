@@ -1,0 +1,61 @@
+.wrap {
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.form-table th {
+    width: 250px;
+}
+
+.form-table input[type="color"] {
+    width: 100px;
+}
+
+.form-table input[type="text"] {
+    width: 300px;
+}
+
+.wp-list-table .column-actions {
+    width: 25%;
+}
+
+.wp-list-table .button {
+    margin-right: 5px;
+}
+
+.huchatbot-message {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+.huchatbot-message-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.huchatbot-message p {
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 5px;
+    background-color: #444654;
+    color: #ffffff;
+}
+.huchatbot-message-bot {
+    justify-content: flex-start;
+}
+.huchatbot-message-user {
+    justify-content: flex-end;
+}
+.huchatbot-message-user p {
+    background-color: #40414f;
+    color: #ffffff;
+}
+.huchatbot-maximize {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: 10px;
+}
