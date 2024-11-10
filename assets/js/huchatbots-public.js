@@ -241,7 +241,7 @@
             data.append('action', 'huchatbots_save_conversation');
             data.append('conversation_id', conversationId);
             data.append('course_id', courseId);
-            data.append('nonce', huchatbotsData.nonce);
+            // data.append('nonce', huchatbotsData.nonce);
 
             fetch(huchatbotsData.ajax_url, {
                 method: 'POST',
@@ -278,6 +278,7 @@
                 // You might want to show an error message to the user here
             });
         }
+        
 
         resetChatbotPosition();
     });
