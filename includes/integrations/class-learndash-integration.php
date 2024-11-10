@@ -9,17 +9,25 @@ class LearnDashIntegration {
 
     public function enqueue_chatbot_script() {
         if ($this->is_learndash_lesson() && $this->is_chatbot_enabled_for_current_course()) {
-            wp_enqueue_script('huchatbots-frontend', HUCHATBOTS_PLUGIN_URL . 'assets/js/huchatbots-public.js', array('jquery'), HUCHATBOTS_VERSION, true);
-            wp_localize_script('huchatbots-frontend', 'huchatbotsData', array(
+            wp_enqueue_script('huchatbots-public', HUCHATBOTS_PLUGIN_URL . 'assets/js/huchatbots-public.js', array('jquery'), HUCHATBOTS_VERSION, true);
+            wp_localize_script('huchatbots-public', 'huchatbotsData', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('huchatbots_nonce'),
-                'course_id' => $this->get_current_course_id()
+                'course_id' => $this->get_current_course_id(),
+                'is_learndash_lesson' => $this->is_learndash_lesson(),
+                'is_chatbot_enabled' => $this->is_chatbot_enabled_for_current_course(),
+                'plugin_url' => HUCHATBOTS_PLUGIN_URL
             ));
+            error_log('HUchatbots: Script enqueued with data: ' . print_r(wp_json_encode(huchatbotsData), true));
+        } else {
+            error_log('HUchatbots: Script not enqueued. Is LearnDash lesson: ' . ($this->is_learndash_lesson() ? 'Yes' : 'No') . ', Is chatbot enabled: ' . ($this->is_chatbot_enabled_for_current_course() ? 'Yes' : 'No'));
         }
     }
 
     public function render_chatbot_container() {
+        error_log('HUchatbots: render_chatbot_container called');
         if ($this->is_learndash_lesson() && $this->is_chatbot_enabled_for_current_course()) {
+            error_log('HUchatbots: Conditions met for rendering chatbot');
             $course_id = $this->get_current_course_id();
             $chatbot_settings = $this->get_chatbot_settings($course_id);
             
@@ -33,28 +41,43 @@ class LearnDashIntegration {
                     <!-- O conteúdo do chatbot será renderizado aqui pelo JavaScript -->
                 </div>
                 <?php
+                error_log('HUchatbots: Chatbot container rendered');
+            } else {
+                error_log('HUchatbots: No chatbot settings found for course ' . $course_id);
             }
+        } else {
+            error_log('HUchatbots: Conditions not met for rendering chatbot');
         }
     }
 
     private function is_learndash_lesson() {
-        return function_exists('learndash_get_post_type_slug') && 
-               is_singular(learndash_get_post_type_slug('lesson'));
+        $is_lesson = function_exists('learndash_get_post_type_slug') && 
+                     is_singular(learndash_get_post_type_slug('lesson'));
+        error_log('HUchatbots: Is LearnDash lesson: ' . ($is_lesson ? 'Yes' : 'No'));
+        return $is_lesson;
     }
 
     private function get_current_course_id() {
+        $course_id = 0;
         if (function_exists('learndash_get_course_id')) {
-            return learndash_get_course_id();
+            $course_id = learndash_get_course_id();
         }
-        return 0;
+        error_log('HUchatbots: Current course ID: ' . $course_id);
+        return $course_id;
     }
 
     private function is_chatbot_enabled_for_current_course() {
         $course_id = $this->get_current_course_id();
-        return $this->is_chatbot_enabled_for_course($course_id);
+        $is_enabled = $this->is_chatbot_enabled_for_course($course_id);
+        error_log('HUchatbots: Chatbot enabled for course ' . $course_id . ': ' . ($is_enabled ? 'Yes' : 'No'));
+        return $is_enabled;
     }
 
     private function is_chatbot_enabled_for_course($course_id) {
+        if (!$this->table_exists()) {
+            error_log('HUchatbots: Database table does not exist');
+            return false;
+        }
         global $wpdb;
         $table_name = $wpdb->prefix . 'huchatbots';
         $chatbot = $wpdb->get_row($wpdb->prepare(
@@ -65,12 +88,24 @@ class LearnDashIntegration {
     }
 
     private function get_chatbot_settings($course_id) {
+        if (!$this->table_exists()) {
+            error_log('HUchatbots: Database table does not exist');
+            return null;
+        }
         global $wpdb;
         $table_name = $wpdb->prefix . 'huchatbots';
-        return $wpdb->get_row($wpdb->prepare(
+        $settings = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_name WHERE course_id = %d",
             $course_id
         ), ARRAY_A);
+        error_log('HUchatbots: Chatbot settings for course ' . $course_id . ': ' . print_r($settings, true));
+        return $settings;
+    }
+
+    private function table_exists() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'huchatbots';
+        return $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name;
     }
 }
 
