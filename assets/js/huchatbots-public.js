@@ -31,8 +31,8 @@
         const difyApiUrl = huchatbotsData.dify_api_url;
 
         const defaultStyle = {
-            width: '350px',
-            height: '500px',
+            width: '400px',
+            height: '600px',
             right: '20px',
             bottom: '20px',
             top: 'auto',
@@ -151,6 +151,7 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let botResponse = '';
+                let hasConversationId = false;
 
                 function readStream() {
                     return reader.read().then(({ done, value }) => {
@@ -166,16 +167,21 @@
                             if (line.startsWith('data: ')) {
                                 try {
                                     const jsonData = JSON.parse(line.slice(6));
+                                    // Captura o conversation_id do primeiro evento que o contém
+                                    if (!hasConversationId && jsonData.conversation_id) {
+                                        conversationId = jsonData.conversation_id;
+                                        hasConversationId = true;
+                                        console.log('Conversation ID captured:', conversationId);
+                                        saveConversation(conversationId);
+                                    }
+                                    // Acumula a resposta do bot
                                     if (jsonData.event === 'agent_message' && jsonData.answer) {
                                         botResponse += jsonData.answer;
                                         updateTypingIndicator(typingIndicator, botResponse);
                                     }
-                                    if (!conversationId && jsonData.conversation_id) {
-                                        conversationId = jsonData.conversation_id;
-                                        saveConversation(conversationId);
-                                    }
                                 } catch (error) {
                                     console.error('Error parsing JSON:', error);
+                                    console.error('Raw line:', line);
                                 }
                             }
                         });
@@ -224,7 +230,12 @@
         }
 
         function saveConversation(conversationId) {
-            if (!conversationId) return;
+            if (!conversationId) {
+                console.error('No conversation ID provided');
+                return;
+            }
+
+            console.log('Saving conversation:', conversationId);
 
             const data = new FormData();
             data.append('action', 'huchatbots_save_conversation');
@@ -239,18 +250,16 @@
             })
             .then(response => response.text())
             .then(text => {
-                let result;
                 try {
-                    result = JSON.parse(text);
+                    const result = JSON.parse(text);
                     if (result.success) {
-                        console.log('Conversation saved successfully');
+                        console.log('Conversation saved successfully:', conversationId);
                     } else {
                         console.error('Failed to save conversation:', result.data);
                     }
                 } catch (e) {
-                    console.error('Error parsing JSON response:', e);
+                    console.error('Error parsing server response:', e);
                     console.error('Raw response:', text);
-                    throw new Error('Invalid JSON response from server');
                 }
             })
             .catch(error => {
