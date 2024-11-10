@@ -65,7 +65,9 @@
             chatbotContainer.style.transition = 'all 0.3s ease';
             Object.assign(chatbotContainer.style, defaultStyle);
             isMaximized = false;
-            chatbotMaximize.innerHTML = '<i class="bb-icon bb-icon-expand"></i>';
+            if (chatbotMaximize) {
+                chatbotMaximize.innerHTML = '<i class="bb-icon bb-icon-expand"></i>';
+            }
         }
 
         function maximizeChatbot() {
@@ -77,7 +79,9 @@
                 right: '0',
                 bottom: '0'
             });
-            chatbotMaximize.innerHTML = '<i class="bb-icon bb-icon-l"></i>';
+            if (chatbotMaximize) {
+                chatbotMaximize.innerHTML = '<i class="bb-icon bb-icon-l"></i>';
+            }
             isMaximized = true;
         }
 
@@ -89,13 +93,33 @@
             }
         }
 
-        chatbotToggle.addEventListener('click', toggleChatbot);
-        chatbotClose.addEventListener('click', function() {
-            chatbotContainer.classList.remove('huchatbot-visible');
-            chatbotContainer.style.display = 'none';
-            resetChatbotPosition();
-        });
-        chatbotMaximize.addEventListener('click', toggleMaximize);
+        if (chatbotToggle) {
+            chatbotToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('HUchatbots: Toggle button clicked');
+                toggleChatbot();
+            });
+        } else {
+            console.error('HUchatbots: Toggle button not found');
+        }
+
+        if (chatbotClose) {
+            chatbotClose.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('HUchatbots: Close button clicked');
+                chatbotContainer.classList.remove('huchatbot-visible');
+                chatbotContainer.style.display = 'none';
+                resetChatbotPosition();
+            });
+        } else {
+            console.error('HUchatbots: Close button not found');
+        }
+
+        if (chatbotMaximize) {
+            chatbotMaximize.addEventListener('click', toggleMaximize);
+        } else {
+            console.error('HUchatbots: Maximize button not found');
+        }
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && isMaximized) {
@@ -103,18 +127,29 @@
             }
         });
 
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+        } else {
+            console.error('HUchatbots: Textarea not found');
+        }
 
-        sendButton.addEventListener('click', sendMessage);
-        textarea.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
+        if (sendButton) {
+            sendButton.addEventListener('click', sendMessage);
+        } else {
+            console.error('HUchatbots: Send button not found');
+        }
+
+        if (textarea) {
+            textarea.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
 
         function sendMessage() {
             const message = textarea.value.trim();
@@ -274,10 +309,10 @@
             .catch(error => {
                 console.error('Error saving conversation:', error);
                 console.error('Error details:', error.message);
-                // You might want to show an error message to the user here
             });
         }
         
         resetChatbotPosition();
+        console.log('HUchatbots: Script initialization complete');
     });
 })(jQuery);
