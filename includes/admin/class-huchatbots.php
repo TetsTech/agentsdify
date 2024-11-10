@@ -55,7 +55,7 @@ class HUchatbots {
     }
 
     private function define_public_hooks() {
-        $public_display = new \HUchatbots\Frontend\PublicDisplay($this->get_plugin_name(), $this->get_version());
+        $public_display = new \HUchatbots\Integrations\LearnDashIntegration($this->get_plugin_name(), $this->get_version());
         $this->loader->add_action('wp_enqueue_scripts', $public_display, 'enqueue_styles');
         $this->loader->add_action('wp_enqueue_scripts', $public_display, 'enqueue_scripts');
         $this->loader->add_action('wp_footer', $public_display, 'display_chatbot');
