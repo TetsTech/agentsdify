@@ -18,6 +18,7 @@ class AjaxHandler {
 
     public function save_conversation() {
         error_log('HUchatbots: save_conversation called');
+        error_log('HUchatbots: POST data: ' . print_r($_POST, true));
         
         // Ensure we only output JSON
         header('Content-Type: application/json');
@@ -25,6 +26,10 @@ class AjaxHandler {
         try {
             if (!check_ajax_referer('huchatbots_nonce', 'nonce', false)) {
                 throw new \Exception('Invalid nonce.');
+            }
+
+            if (!isset($_POST['conversation_id']) || !isset($_POST['course_id'])) {
+                throw new \Exception('Missing required fields.');
             }
 
             $conversation_id = sanitize_text_field($_POST['conversation_id']);
@@ -62,7 +67,7 @@ class AjaxHandler {
             );
 
             if ($result === false) {
-                throw new \Exception('Failed to save conversation to database.');
+                throw new \Exception('Failed to save conversation to database. DB Error: ' . $wpdb->last_error);
             }
 
             error_log("HUchatbots: Conversation saved successfully - ID: $conversation_id");
