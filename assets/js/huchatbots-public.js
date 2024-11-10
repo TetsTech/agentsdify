@@ -167,14 +167,12 @@
                             if (line.startsWith('data: ')) {
                                 try {
                                     const jsonData = JSON.parse(line.slice(6));
-                                    // Captura o conversation_id do primeiro evento que o contém
                                     if (!hasConversationId && jsonData.conversation_id) {
                                         conversationId = jsonData.conversation_id;
                                         hasConversationId = true;
                                         console.log('Conversation ID captured:', conversationId);
                                         saveConversation(conversationId);
                                     }
-                                    // Acumula a resposta do bot
                                     if (jsonData.event === 'agent_message' && jsonData.answer) {
                                         botResponse += jsonData.answer;
                                         updateTypingIndicator(typingIndicator, botResponse);
@@ -237,15 +235,19 @@
 
             console.log('Saving conversation:', conversationId);
 
-            const data = new FormData();
+            const data = new URLSearchParams();
             data.append('action', 'huchatbots_save_conversation');
             data.append('conversation_id', conversationId);
             data.append('course_id', courseId);
-            // data.append('nonce', huchatbotsData.nonce);
+            data.append('nonce', huchatbotsData.nonce);
 
             fetch(huchatbotsData.ajax_url, {
                 method: 'POST',
                 credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 body: data
             })
             .then(response => {
@@ -255,21 +257,18 @@
                 return response.text();
             })
             .then(text => {
-                console.log('Raw server response:', text); // Log the raw response
-                if (text.trim().startsWith('<!doctype html>')) {
-                    throw new Error('Received HTML instead of JSON. Possible PHP error.');
-                }
+                console.log('Raw server response:', text);
                 try {
                     const result = JSON.parse(text);
                     if (result.success) {
                         console.log('Conversation saved successfully:', conversationId);
                     } else {
-                        console.error('Failed to save conversation:', result.data);
+                        console.error('Failed to save conversation:', result.message);
                     }
                 } catch (e) {
                     console.error('Error parsing server response:', e);
                     console.error('Raw response:', text);
-                    throw e; // Re-throw to trigger the catch block
+                    throw e;
                 }
             })
             .catch(error => {
@@ -279,7 +278,6 @@
             });
         }
         
-
         resetChatbotPosition();
     });
 })(jQuery);

@@ -7,16 +7,19 @@ class LearnDashIntegration {
         add_action('wp_footer', array($this, 'render_chatbot_container'));
     }
 
+    public function init() {
+        // Initialization code if needed
+    }
+
     public function enqueue_chatbot_script() {
         if ($this->is_learndash_lesson() && $this->is_chatbot_enabled_for_current_course()) {
             wp_enqueue_script('huchatbots-public', HUCHATBOTS_PLUGIN_URL . 'assets/js/huchatbots-public.js', array('jquery'), HUCHATBOTS_VERSION, true);
             wp_localize_script('huchatbots-public', 'huchatbotsData', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('huchatbots_nonce'),
-                'course_id' => $this->get_current_course_id(),
-                'is_learndash_lesson' => $this->is_learndash_lesson(),
-                'is_chatbot_enabled' => $this->is_chatbot_enabled_for_current_course(),
-                'plugin_url' => HUCHATBOTS_PLUGIN_URL
+                'course_id' => $current_course_id,
+                'dify_api_key' => $dify_api_key,
+                'dify_api_url' => $dify_api_url
             ));
             error_log('HUchatbots: Script enqueued with data: ' . print_r(wp_json_encode(huchatbotsData), true));
         } else {
@@ -108,5 +111,3 @@ class LearnDashIntegration {
         return $wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name;
     }
 }
-
-new LearnDashIntegration();

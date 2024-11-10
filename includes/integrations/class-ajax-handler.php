@@ -24,9 +24,9 @@ class AjaxHandler {
         header('Content-Type: application/json');
         
         try {
-            // if (!check_ajax_referer('huchatbots_nonce', 'nonce', false)) {
-            //     throw new \Exception('Invalid nonce.');
-            // }
+            if (!check_ajax_referer('huchatbots_nonce', 'nonce', false)) {
+                throw new \Exception('Invalid nonce.');
+            }
 
             if (!isset($_POST['conversation_id']) || !isset($_POST['course_id'])) {
                 throw new \Exception('Missing required fields.');
