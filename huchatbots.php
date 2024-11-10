@@ -113,10 +113,11 @@ function run_huchatbots() {
         $admin_menu = new HUchatbots\Admin\AdminMenu();
         $chatbot_list = new HUchatbots\Admin\ChatbotList();
         $ajax_handler = new HUchatbots\Integrations\AjaxHandler();
-        $learndash_integration = new HUchatbots\Integrations\LearnDashIntegration();
+        $learndash_integration = new HUchatbots\Integrations\LearnDashIntegration('huchatbots', HUCHATBOTS_VERSION);
 
         $chatbot_list->init();
         $ajax_handler->init();
+        // Não é necessário chamar init() para LearnDashIntegration, pois o construtor já configura as ações necessárias
 
         $plugin->run();
         error_log('HUchatbots: Plugin initialized successfully');
