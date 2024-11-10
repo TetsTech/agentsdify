@@ -24,7 +24,6 @@ class HUchatbots {
             'includes/admin/class-chatbot-list.php',
             'includes/admin/class-chatbot-manager.php',
             'includes/admin/class-chatbot-settings.php',
-            'includes/frontend/class-public-display.php'
         ];
 
         foreach ($files_to_require as $file) {
