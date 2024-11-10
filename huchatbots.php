@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: HUagents
-Description: Sistema avançado de gerenciamento de múltiplos Agentes para LearnDash
-Version: 1.0.2
+Plugin Name: HUchatbots
+Description: Sistema avançado de gerenciamento de múltiplos chatbots para LearnDash
+Version: 1.0.0
 Author: Humana Labs
 Text Domain: huchatbots
 Domain Path: /languages
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define constantes
-define('HUCHATBOTS_VERSION', '1.0.2');
+define('HUCHATBOTS_VERSION', '1.0.0');
 define('HUCHATBOTS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('HUCHATBOTS_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('HUCHATBOTS_PLUGIN_BASENAME', plugin_basename(__FILE__));
@@ -82,9 +82,8 @@ function run_huchatbots() {
         $admin_menu_file = HUCHATBOTS_PLUGIN_DIR . 'includes/admin/class-admin-menu.php';
         $chatbot_list_file = HUCHATBOTS_PLUGIN_DIR . 'includes/admin/class-chatbot-list.php';
         $ajax_handler_file = HUCHATBOTS_PLUGIN_DIR . 'includes/integrations/class-ajax-handler.php';
-        $learndash_integration_file = HUCHATBOTS_PLUGIN_DIR . 'includes/integrations/class-learndash-integration.php';
 
-        $files_to_require = [$main_class_file, $admin_menu_file, $chatbot_list_file, $ajax_handler_file, $learndash_integration_file];
+        $files_to_require = [$main_class_file, $admin_menu_file, $chatbot_list_file, $ajax_handler_file];
 
         foreach ($files_to_require as $file) {
             if (!file_exists($file)) {
@@ -105,19 +104,14 @@ function run_huchatbots() {
         if (!class_exists('HUchatbots\Integrations\AjaxHandler')) {
             throw new Exception('HUchatbots\Integrations\AjaxHandler class not found');
         }
-        if (!class_exists('HUchatbots\Integrations\LearnDashIntegration')) {
-            throw new Exception('HUchatbots\Integrations\LearnDashIntegration class not found');
-        }
 
         $plugin = new HUchatbots\Admin\HUchatbots();
         $admin_menu = new HUchatbots\Admin\AdminMenu();
         $chatbot_list = new HUchatbots\Admin\ChatbotList();
         $ajax_handler = new HUchatbots\Integrations\AjaxHandler();
-        $learndash_integration = new HUchatbots\Integrations\LearnDashIntegration('huchatbots', HUCHATBOTS_VERSION);
 
-        $chatbot_list->init();
-        $ajax_handler->init();
-        // Não é necessário chamar init() para LearnDashIntegration, pois o construtor já configura as ações necessárias
+        $chatbot_list->init(); // Inicializa a classe ChatbotList
+        $ajax_handler->init(); // Inicializa o manipulador AJAX
 
         $plugin->run();
         error_log('HUchatbots: Plugin initialized successfully');

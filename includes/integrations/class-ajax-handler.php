@@ -1,12 +1,16 @@
 <?php
 namespace HUchatbots\Integrations;
 
+use HUchatbots\Api\DifyApi;
+
 class AjaxHandler {
     private $conversations_table;
+    private $chatbots_table;
 
     public function __construct() {
         global $wpdb;
         $this->conversations_table = $wpdb->prefix . 'huchatbots_conversations';
+        $this->chatbots_table = $wpdb->prefix . 'huchatbots';
         error_log('HUchatbots: AjaxHandler constructed');
     }
 
@@ -18,18 +22,9 @@ class AjaxHandler {
 
     public function save_conversation() {
         error_log('HUchatbots: save_conversation called');
-        error_log('HUchatbots: POST data: ' . print_r($_POST, true));
-        
-        // Ensure we only output JSON
-        header('Content-Type: application/json');
-        
         try {
-            // if (!check_ajax_referer('huchatbots_nonce', 'nonce', false)) {
-            //     throw new \Exception('Invalid nonce.');
-            // }
-
-            if (!isset($_POST['conversation_id']) || !isset($_POST['course_id'])) {
-                throw new \Exception('Missing required fields.');
+            if (!check_ajax_referer('huchatbots_nonce', 'nonce', false)) {
+                throw new \Exception('Invalid nonce.');
             }
 
             $conversation_id = sanitize_text_field($_POST['conversation_id']);
@@ -50,8 +45,8 @@ class AjaxHandler {
 
             if ($existing) {
                 error_log("HUchatbots: Conversation already exists - ID: $conversation_id");
-                echo json_encode(['success' => true, 'message' => 'Conversation already exists.']);
-                wp_die();
+                wp_send_json_success('Conversation already exists.');
+                return;
             }
 
             // Inserir nova conversa
@@ -67,15 +62,15 @@ class AjaxHandler {
             );
 
             if ($result === false) {
-                throw new \Exception('Failed to save conversation to database. DB Error: ' . $wpdb->last_error);
+                throw new \Exception('Failed to save conversation to database.');
             }
 
             error_log("HUchatbots: Conversation saved successfully - ID: $conversation_id");
-            echo json_encode(['success' => true, 'message' => 'Conversation saved successfully.']);
+            wp_send_json_success('Conversation saved successfully.');
         } catch (\Exception $e) {
             error_log('HUchatbots Error: ' . $e->getMessage());
-            echo json_encode(['success' => false, 'message' => 'Error saving conversation: ' . $e->getMessage()]);
+            wp_send_json_error('Error saving conversation: ' . $e->getMessage());
         }
-        wp_die();
+        wp_die(); // Ensure that the script stops executing after sending the response
     }
 }

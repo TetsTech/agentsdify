@@ -31,8 +31,8 @@
         const difyApiUrl = huchatbotsData.dify_api_url;
 
         const defaultStyle = {
-            width: '400px',
-            height: '600px',
+            width: '350px',
+            height: '500px',
             right: '20px',
             bottom: '20px',
             top: 'auto',
@@ -65,9 +65,7 @@
             chatbotContainer.style.transition = 'all 0.3s ease';
             Object.assign(chatbotContainer.style, defaultStyle);
             isMaximized = false;
-            if (chatbotMaximize) {
-                chatbotMaximize.innerHTML = '<i class="bb-icon bb-icon-expand"></i>';
-            }
+            chatbotMaximize.innerHTML = '<i class="bb-icon bb-icon-expand"></i>';
         }
 
         function maximizeChatbot() {
@@ -79,9 +77,7 @@
                 right: '0',
                 bottom: '0'
             });
-            if (chatbotMaximize) {
-                chatbotMaximize.innerHTML = '<i class="bb-icon bb-icon-l"></i>';
-            }
+            chatbotMaximize.innerHTML = '<i class="bb-icon bb-icon-l"></i>';
             isMaximized = true;
         }
 
@@ -93,33 +89,13 @@
             }
         }
 
-        if (chatbotToggle) {
-            chatbotToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('HUchatbots: Toggle button clicked');
-                toggleChatbot();
-            });
-        } else {
-            console.error('HUchatbots: Toggle button not found');
-        }
-
-        if (chatbotClose) {
-            chatbotClose.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('HUchatbots: Close button clicked');
-                chatbotContainer.classList.remove('huchatbot-visible');
-                chatbotContainer.style.display = 'none';
-                resetChatbotPosition();
-            });
-        } else {
-            console.error('HUchatbots: Close button not found');
-        }
-
-        if (chatbotMaximize) {
-            chatbotMaximize.addEventListener('click', toggleMaximize);
-        } else {
-            console.error('HUchatbots: Maximize button not found');
-        }
+        chatbotToggle.addEventListener('click', toggleChatbot);
+        chatbotClose.addEventListener('click', function() {
+            chatbotContainer.classList.remove('huchatbot-visible');
+            chatbotContainer.style.display = 'none';
+            resetChatbotPosition();
+        });
+        chatbotMaximize.addEventListener('click', toggleMaximize);
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && isMaximized) {
@@ -127,29 +103,18 @@
             }
         });
 
-        if (textarea) {
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
-            });
-        } else {
-            console.error('HUchatbots: Textarea not found');
-        }
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
 
-        if (sendButton) {
-            sendButton.addEventListener('click', sendMessage);
-        } else {
-            console.error('HUchatbots: Send button not found');
-        }
-
-        if (textarea) {
-            textarea.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-        }
+        sendButton.addEventListener('click', sendMessage);
+        textarea.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
 
         function sendMessage() {
             const message = textarea.value.trim();
@@ -186,7 +151,6 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let botResponse = '';
-                let hasConversationId = false;
 
                 function readStream() {
                     return reader.read().then(({ done, value }) => {
@@ -202,19 +166,16 @@
                             if (line.startsWith('data: ')) {
                                 try {
                                     const jsonData = JSON.parse(line.slice(6));
-                                    if (!hasConversationId && jsonData.conversation_id) {
-                                        conversationId = jsonData.conversation_id;
-                                        hasConversationId = true;
-                                        console.log('Conversation ID captured:', conversationId);
-                                        saveConversation(conversationId);
-                                    }
                                     if (jsonData.event === 'agent_message' && jsonData.answer) {
                                         botResponse += jsonData.answer;
                                         updateTypingIndicator(typingIndicator, botResponse);
                                     }
+                                    if (!conversationId && jsonData.conversation_id) {
+                                        conversationId = jsonData.conversation_id;
+                                        saveConversation(conversationId);
+                                    }
                                 } catch (error) {
                                     console.error('Error parsing JSON:', error);
-                                    console.error('Raw line:', line);
                                 }
                             }
                         });
@@ -263,14 +224,9 @@
         }
 
         function saveConversation(conversationId) {
-            if (!conversationId) {
-                console.error('No conversation ID provided');
-                return;
-            }
+            if (!conversationId) return;
 
-            console.log('Saving conversation:', conversationId);
-
-            const data = new URLSearchParams();
+            const data = new FormData();
             data.append('action', 'huchatbots_save_conversation');
             data.append('conversation_id', conversationId);
             data.append('course_id', courseId);
@@ -279,31 +235,22 @@
             fetch(huchatbotsData.ajax_url, {
                 method: 'POST',
                 credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
                 body: data
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.text();
-            })
+            .then(response => response.text())
             .then(text => {
-                console.log('Raw server response:', text);
+                let result;
                 try {
-                    const result = JSON.parse(text);
+                    result = JSON.parse(text);
                     if (result.success) {
-                        console.log('Conversation saved successfully:', conversationId);
+                        console.log('Conversation saved successfully');
                     } else {
-                        console.error('Failed to save conversation:', result.message);
+                        console.error('Failed to save conversation:', result.data);
                     }
                 } catch (e) {
-                    console.error('Error parsing server response:', e);
+                    console.error('Error parsing JSON response:', e);
                     console.error('Raw response:', text);
-                    throw e;
+                    throw new Error('Invalid JSON response from server');
                 }
             })
             .catch(error => {
@@ -311,8 +258,7 @@
                 console.error('Error details:', error.message);
             });
         }
-        
+
         resetChatbotPosition();
-        console.log('HUchatbots: Script initialization complete');
     });
 })(jQuery);
