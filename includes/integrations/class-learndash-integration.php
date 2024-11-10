@@ -9,8 +9,8 @@ class LearnDashIntegration {
 
     public function enqueue_chatbot_script() {
         if ($this->is_learndash_lesson() && $this->is_chatbot_enabled_for_current_course()) {
-            wp_enqueue_script('huchatbots-public', HUCHATBOTS_PLUGIN_URL . 'assets/js/huchatbots-public.js', array('jquery'), HUCHATBOTS_VERSION, true);
-            wp_localize_script('huchatbots-public', 'huchatbotsData', array(
+            wp_enqueue_script('huchatbots-frontend', HUCHATBOTS_PLUGIN_URL . 'assets/js/huchatbots-public.js', array('jquery'), HUCHATBOTS_VERSION, true);
+            wp_localize_script('huchatbots-frontend', 'huchatbotsData', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('huchatbots_nonce'),
                 'course_id' => $this->get_current_course_id()
