@@ -13,9 +13,10 @@ class LearnDashIntegration {
             wp_localize_script('huchatbots-public', 'huchatbotsData', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('huchatbots_nonce'),
-                'course_id' => $current_course_id,
-                'dify_api_key' => $dify_api_key,
-                'dify_api_url' => $dify_api_url
+                'course_id' => $this->get_current_course_id(),
+                'is_learndash_lesson' => $this->is_learndash_lesson(),
+                'is_chatbot_enabled' => $this->is_chatbot_enabled_for_current_course(),
+                'plugin_url' => HUCHATBOTS_PLUGIN_URL
             ));
             error_log('HUchatbots: Script enqueued with data: ' . print_r(wp_json_encode(huchatbotsData), true));
         } else {

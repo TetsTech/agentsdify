@@ -117,6 +117,7 @@ function run_huchatbots() {
 
         $chatbot_list->init();
         $ajax_handler->init();
+        $learndash_integration->init();
 
         $plugin->run();
         error_log('HUchatbots: Plugin initialized successfully');
