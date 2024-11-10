@@ -248,8 +248,17 @@
                 credentials: 'same-origin',
                 body: data
             })
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
             .then(text => {
+                console.log('Raw server response:', text); // Log the raw response
+                if (text.trim().startsWith('<!doctype html>')) {
+                    throw new Error('Received HTML instead of JSON. Possible PHP error.');
+                }
                 try {
                     const result = JSON.parse(text);
                     if (result.success) {
@@ -260,11 +269,13 @@
                 } catch (e) {
                     console.error('Error parsing server response:', e);
                     console.error('Raw response:', text);
+                    throw e; // Re-throw to trigger the catch block
                 }
             })
             .catch(error => {
                 console.error('Error saving conversation:', error);
                 console.error('Error details:', error.message);
+                // You might want to show an error message to the user here
             });
         }
 

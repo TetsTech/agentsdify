@@ -1,16 +1,12 @@
 <?php
 namespace HUchatbots\Integrations;
 
-use HUchatbots\Api\DifyApi;
-
 class AjaxHandler {
     private $conversations_table;
-    private $chatbots_table;
 
     public function __construct() {
         global $wpdb;
         $this->conversations_table = $wpdb->prefix . 'huchatbots_conversations';
-        $this->chatbots_table = $wpdb->prefix . 'huchatbots';
         error_log('HUchatbots: AjaxHandler constructed');
     }
 
@@ -22,6 +18,10 @@ class AjaxHandler {
 
     public function save_conversation() {
         error_log('HUchatbots: save_conversation called');
+        
+        // Ensure we only output JSON
+        header('Content-Type: application/json');
+        
         try {
             if (!check_ajax_referer('huchatbots_nonce', 'nonce', false)) {
                 throw new \Exception('Invalid nonce.');
@@ -45,8 +45,8 @@ class AjaxHandler {
 
             if ($existing) {
                 error_log("HUchatbots: Conversation already exists - ID: $conversation_id");
-                wp_send_json_success('Conversation already exists.');
-                return;
+                echo json_encode(['success' => true, 'message' => 'Conversation already exists.']);
+                wp_die();
             }
 
             // Inserir nova conversa
@@ -66,11 +66,11 @@ class AjaxHandler {
             }
 
             error_log("HUchatbots: Conversation saved successfully - ID: $conversation_id");
-            wp_send_json_success('Conversation saved successfully.');
+            echo json_encode(['success' => true, 'message' => 'Conversation saved successfully.']);
         } catch (\Exception $e) {
             error_log('HUchatbots Error: ' . $e->getMessage());
-            wp_send_json_error('Error saving conversation: ' . $e->getMessage());
+            echo json_encode(['success' => false, 'message' => 'Error saving conversation: ' . $e->getMessage()]);
         }
-        wp_die(); // Ensure that the script stops executing after sending the response
+        wp_die();
     }
 }
