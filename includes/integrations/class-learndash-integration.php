@@ -27,7 +27,7 @@ class LearnDashIntegration {
             if ($chatbot_settings) {
                 wp_enqueue_script($this->plugin_name, HUCHATBOTS_PLUGIN_URL . 'assets/js/huchatbots-public.js', array('jquery'), $this->version, true);
                 
-                $localized_data = array(
+                $huchatbotsData = array(
                     'ajax_url' => admin_url('admin-ajax.php'),
                     'nonce' => wp_create_nonce('huchatbots_nonce'),
                     'course_id' => $course_id,
@@ -38,7 +38,7 @@ class LearnDashIntegration {
                     'dify_api_url' => $chatbot_settings['api_url'] ?? ''
                 );
 
-                wp_localize_script($this->plugin_name, 'huchatbotsData', $localized_data);
+                wp_localize_script($this->plugin_name, 'huchatbotsData', $huchatbotsData);
 
                 wp_add_inline_script($this->plugin_name, 'console.log("HUchatbots script loaded"); console.log("HUchatbots data:", huchatbotsData);', 'before');
 
