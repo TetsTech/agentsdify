@@ -2,7 +2,7 @@
 /*
 Plugin Name: HUagents
 Description: Sistema avançado de gerenciamento de múltiplos Agentes para LearnDash
-Version: 1.0.0
+Version: 1.0.1
 Author: Humana Labs
 Text Domain: huchatbots
 Domain Path: /languages
