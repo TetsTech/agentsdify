@@ -1,7 +1,7 @@
 <?php
 /*
-Plugin Name: HUchatbots
-Description: Sistema avançado de gerenciamento de múltiplos chatbots para LearnDash
+Plugin Name: HUagents
+Description: Sistema avançado de gerenciamento de múltiplos Agentes para LearnDash
 Version: 1.0.0
 Author: Humana Labs
 Text Domain: huchatbots
